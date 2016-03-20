@@ -24,7 +24,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private TextView info;
     private Button chatButton;
-    private String userId;
+    private String userId,token;
 
     private CallbackManager callbackManager;
 
@@ -38,6 +38,7 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
         info = (TextView) findViewById(R.id.info);
         LoginButton loginButton = (LoginButton) findViewById(R.id.login_button);
+        loginButton.setReadPermissions("user_friends","email");
         chatButton = (Button) findViewById(R.id.chatNowButton);
         loginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
             @Override
@@ -50,7 +51,7 @@ public class LoginActivity extends AppCompatActivity {
                         + loginResult.getAccessToken().getToken();
 
                 userId = loginResult.getAccessToken().getUserId();
-
+                token = loginResult.getAccessToken().getToken();
                 info.setText(content);
             }
 
@@ -67,6 +68,8 @@ public class LoginActivity extends AppCompatActivity {
 
         if(AccessToken.getCurrentAccessToken() != null){
             chatButton.setVisibility(View.VISIBLE);
+            userId = AccessToken.getCurrentAccessToken().getUserId();
+            token = AccessToken.getCurrentAccessToken().getToken();
         } else {
             chatButton.setVisibility(View.GONE);
         }
@@ -85,16 +88,25 @@ public class LoginActivity extends AppCompatActivity {
 
     public void startChat(View v){
         RequestPackage requestPackage = new RequestPackage();
-        requestPackage.setUri("http://192.168.0.108:3333/");
+        requestPackage.setUri("http://192.168.0.107:3000/online");
         requestPackage.setMethod("POST");
         requestPackage.setParam("uid", userId);
+        requestPackage.setParam("tok", token);
+        chatButton.setEnabled(false);
+        chatButton.setText("Connecting ...");
         new NetworkTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,requestPackage);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        callbackManager.onActivityResult(requestCode,resultCode,data);
+        callbackManager.onActivityResult(requestCode, resultCode, data);
+    }
+
+    private void loadChatActivity(){
+        Intent intent = new Intent(this,ChatActivity.class);
+        startActivity(intent);
+        finish();
     }
 
     private class NetworkTask extends AsyncTask<RequestPackage,Void,String>{
@@ -109,6 +121,11 @@ public class LoginActivity extends AppCompatActivity {
             super.onPostExecute(s);
             if(s != null){
                 info.setText(s);
+                loadChatActivity();
+            } else {
+                info.setText("Unable To Connect, Please Try Later");
+                chatButton.setText("Chat Now");
+                chatButton.setEnabled(true);
             }
         }
     }
