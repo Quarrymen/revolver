@@ -214,7 +214,7 @@ public class ChatActivity extends AppCompatActivity {
         }
 
         mInputMessageView.setText("");
-//        addMessage(mUsername, message);
+        addMessage(mUsername, message);
 
         // perform the sending message attempt.
         mSocket.emit("chat message", message);
@@ -233,17 +233,17 @@ public class ChatActivity extends AppCompatActivity {
         }
     };
 
-    private void startSignIn() {
-        mUsername = null;
-        Intent intent = new Intent(this, LoginActivity.class);
-        startActivityForResult(intent, REQUEST_LOGIN);
-    }
+//    private void startSignIn() {
+//        mUsername = null;
+//        Intent intent = new Intent(this, LoginActivity.class);
+//        startActivityForResult(intent, REQUEST_LOGIN);
+//    }
 
     private void leave() {
         mUsername = null;
         mSocket.disconnect();
         mSocket.connect();
-        startSignIn();
+        //startSignIn();
     }
 
     private void scrollToBottom() {
@@ -256,6 +256,9 @@ public class ChatActivity extends AppCompatActivity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
+
+//                    Log.d("length", args.length+"");
+//                    String data = "random";
                     String data = (String) args[0];
                     String username = "Vikas";
 //                    String message;
